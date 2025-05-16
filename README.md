@@ -1,2 +1,4 @@
 # Core
-Core of SupaGift projects submission
+Frontend = github.com/supagift/supafront
+# Docs
+soon
