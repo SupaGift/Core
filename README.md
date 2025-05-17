@@ -45,27 +45,7 @@ Open http://localhost:3000 and create your first gift.
 
 ---
 
-## 3  Folder Structure & DDD Layers
-src/
-├─ app/ # Next.js Route Handlers & Pages
-│ ├─ sender/ # Sender journey (amount ➜ type ➜ checkout ➜ pay ➜ success)
-│ ├─ gift/ # Receiver journey ([giftId]/index + withdraw)
-│ └─ api/ # Route handlers (Privy create-user, etc.)
-├─ entities/ # Pure domain logic
-│ ├─ gift/ # DTOs + Supabase adapter
-│ └─ user/
-├─ features/ # Re-usable UX slices
-│ ├─ auth/ # Privy login components
-│ └─ sender-flow/ # Global React Context for wizard
-├─ shared/ # Cross-cutting utilities & UI atoms
-│ ├─ lib/ # supabaseClient, solana.ts helpers…
-│ └─ ui/ # Button, AuthHeader, etc.
-
-*FSD keeps UI/State logic close to pages while DDD isolates business rules in `entities/`.*
-
----
-
-## 4  Domain Model
+## 3  Domain Model
 
 ### `gifts` table
 
@@ -87,9 +67,10 @@ A minimal `users` table stores `{ email, wallet }` for analytics.
 
 ---
 
-![Sender diagram flow](supagift_1.png)
 
-## 5  Sender Flow 🔄
+## 4  Sender Flow 🔄
+
+![Sender diagram flow](supagift_1.png)
 
 | Page                 | Component                                   | Key Logic |
 | -------------------- | ------------------------------------------- | --------- |
@@ -105,9 +86,10 @@ The wizard state persists in `<SenderFlowProvider>` enabling back/forward naviga
 
 ---
 
-![Receiver diagram flow](supagift_2.png)
 
-## 6  Receiver Flow 🎉
+## 5  Receiver Flow 🎉
+
+![Receiver diagram flow](supagift_2.png)
 
 1. User opens `/gift/[giftId]` from link or QR.
 2. Gift fetched using `fetchGiftById()` -> locked view.
@@ -121,7 +103,7 @@ All branch assets live under the same page – routing stays shallow to keep lin
 
 ---
 
-## 7  On-chain Payment Lifecycle
+## 6  On-chain Payment Lifecycle
 
 ```mermaid
 sequenceDiagram
@@ -142,6 +124,28 @@ sequenceDiagram
 ```
 
 Realtime DB push removes need for webhooks locally; in production you can mirror the same logic in a Supabase Edge Function trigger.
+
+---
+
+## 7  Folder Structure & DDD Layers
+src/
+├── app/                        # Next.js Route Handlers & Pages
+│   ├── sender/                # Sender journey: amount → type → checkout → pay → success
+│   ├── gift/                  # Receiver journey: /gift/[giftId] + withdraw flow
+│   └── api/                   # Route handlers (e.g. Privy user creation)
+│
+├── entities/                  # Pure domain logic (DDD)
+│   ├── gift/                 # DTOs, Supabase adapters
+│   └── user/                 # User domain logic
+│
+├── features/                  # Reusable UI/UX slices (FSD pattern)
+│   ├── auth/                 # Privy login components
+│   └── sender-flow/         # React Context for gift creation wizard
+│
+├── shared/                    # Cross-cutting utilities and UI components
+│   ├── lib/                  # supabaseClient, Solana helpers, constants
+│   └── ui/                   # Atoms like Button, AuthHeader, etc.
+
 
 ---
 
