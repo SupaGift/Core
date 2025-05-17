@@ -272,12 +272,15 @@ Supabase Edge Functions are auto-deployed via `supabase functions deploy` in CI/
 
 ## 10  Backlog / Inactive Buttons
 
-* Staking integrations (Marinade / Jito)
-* NFT upload & minting
-* Fiat off-ramp
-* Gift link expiration & tracking
+* 🔄 SOL & USDC on-ramp via Privy / Mercuryo
+* 🔁 Fiat off-ramp integration (Privy/ Coinbase Pay / PayPal/ Merucryo)
+* 🌱 Native staking yield (Marinade, Jito) with auto-compound gifts
+* 🖼️ NFT DAO gifts & in-app governance hooks (Realms / SPL-Governance)
+* 🏠 Real-World Asset (RWA) token gifting (e.g., Helium Mobile credits, RWA-x)
+* ⏰ Gift expiration & auto-refund logic for unclaimed funds
+* 📊 Sender analytics dashboard (Supabase Realtime + charts.js)
+* 🔔 Email & push notifications for claim / withdraw events (Resend + Expo)
 
-These features are visible in the UI but intentionally disabled pending spec.
 
 ---
 
