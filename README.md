@@ -18,6 +18,63 @@
 ---
 
 ## 1  Quick Start
+```mermaid
+flowchart TD
+
+%% ==== SENDER FLOW ====
+StartGift["Make a new gift"]
+ChooseAmount["Choose amount"]
+ChooseGift["Choose gift (Tokens / NFT / Stake)"]
+Checkout["Checkout"]
+Pay["Pay with crypto / On-ramp"]
+
+StartGift --> ChooseAmount --> ChooseGift --> Checkout --> Pay
+
+%% Sender post-checkout
+Checkout -->|Receiver email| CreateWallet["Create wallet in system"]
+CreateWallet --> SendGift["Send gift to wallet"]
+
+Checkout -->|Sender email| StoreGift["Store gift for tracking"]
+
+%% ==== RECEIVER FLOW ====
+ReceiveLink["Receive link via QR / Email / SMS / Telegram"]
+ViewGift["View gift"]
+PrivyLogin["Login with Privy"]
+ClaimGift["Claim gift"]
+
+ReceiveLink --> ViewGift --> PrivyLogin --> ClaimGift
+
+%% Gift types
+ClaimGift --> GiftType{"Gift Type"}
+GiftType --> TokensGift["Tokens"]
+GiftType --> StakeGift["Stake"]
+GiftType --> NFTGift["NFT"]
+
+%% Tokens
+TokensGift -->|Withdraw| WithdrawWallet["Withdraw to wallet"]
+TokensGift -->|Sell| OffRamp["Off-ramp to fiat"]
+
+%% Staking
+StakeGift --> StakePeriod["Stake tokens"]
+StakePeriod --> Unstake["Unstake after period"]
+Unstake --> WithdrawWallet
+Unstake --> OffRamp
+
+%% NFTs
+NFTGift --> WithdrawWallet
+
+%% ==== TAGS BY LAYER ====
+
+classDef backend fill:#f9f,stroke:#000,stroke-width:1px, color:#000
+classDef frontend fill:#bbf,stroke:#000,stroke-width:1px, color:#000
+classDef onchain fill:#bfb,stroke:#000,stroke-width:1px, color:#000
+classDef privy fill:#fcf,stroke:#000,stroke-width:1px, color:#000
+
+class StartGift,ChooseAmount,ChooseGift,Checkout,ReceiveLink,ViewGift frontend
+class CreateWallet,SendGift,StoreGift,ClaimGift,GiftType,OffRamp backend
+class Pay,TokensGift,StakeGift,NFTGift,StakePeriod,Unstake,WithdrawWallet onchain
+class PrivyLogin privy
+```
 
 ```bash
 git clone https://github.com/your-org/breakout-gifts.git
