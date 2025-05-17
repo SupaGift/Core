@@ -166,6 +166,7 @@ Realtime DB push removes need for webhooks locally; in production you can mirror
 ---
 
 ## 7  Folder Structure & DDD Layers
+```
 src/
 ├── app/                        # Next.js Route Handlers & Pages
 │   ├── sender/                # Sender journey: amount → type → checkout → pay → success
@@ -183,7 +184,7 @@ src/
 ├── shared/                    # Cross-cutting utilities and UI components
 │   ├── lib/                  # supabaseClient, Solana helpers, constants
 │   └── ui/                   # Atoms like Button, AuthHeader, etc.
-
+```
 
 ---
 
