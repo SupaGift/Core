@@ -107,20 +107,58 @@ All branch assets live under the same page – routing stays shallow to keep lin
 
 ```mermaid
 sequenceDiagram
-  participant Sender
-  participant Wallet
-  participant SolanaChain
-  participant Supabase
+  autonumber
+  %% === GROUPS ===
+  participant SenderUI as GiftSender UI
+  participant ReceiverUI as GiftReceiver UI
+  participant Supabase as Supabase DB
+  participant EdgeFn as Edge Function (onInsertGift)
+  participant Privy as Privy API
+  participant SolanaPay as Solana Pay / Wallet
+  participant Wallet as Wallet Adapter
 
-  Sender->>Wallet: Scan Solana Pay QR
-  Wallet->>SolanaChain: Transfer SOL with `reference`
-  loop until confirmed
-    PayPage->>SolanaChain: findReference(reference)
+  %% === STEP 1: GIFT CREATION & WALLET GENERATION ===
+  Note over SenderUI, Supabase: 🪄 Step 1: Create Gift
+
+  SenderUI ->> Supabase: INSERT gift\n(senderEmail, receiverEmail, amount, token)\nstatus = "pending"
+
+  Note over Supabase, EdgeFn: 📡 Trigger Edge Function on INSERT
+
+  Supabase ->> EdgeFn: gift_inserted trigger (gift data)
+  EdgeFn ->> Privy: POST /createOrGetWallet { receiverEmail }
+  Privy -->> EdgeFn: Return receiverWalletAddress
+  EdgeFn ->> Supabase: UPDATE gift\nset receiverWalletAddress
+
+  Supabase -->> SenderUI: Notify via Realtime / Polling\n(receiverWalletAddress available)
+  SenderUI ->> SolanaPay: Generate QR Code using encodeURL(receiverWalletAddress, amount, reference)
+
+  Note over SolanaPay: Show QR or wallet button to Sender
+
+  %% === STEP 2: PAYMENT VIA SOLANA PAY ===
+  Note over Wallet, SolanaPay: 💸 Step 2: Sender Pays via SolanaPay
+
+  Wallet ->> SolanaPay: Sign & send transaction
+  SolanaPay ->> EdgeFn: POST /webhook { giftId, txSignature }
+
+  EdgeFn ->> Supabase: UPDATE gift\nstatus = "funded", txSignature
+
+  %% === STEP 3: GIFT CLAIM BY RECEIVER ===
+  Note over ReceiverUI, Supabase: 🎁 Step 3: Receiver Claims Gift
+
+  ReceiverUI ->> Privy: Login with email
+  Privy -->> ReceiverUI: Return auth token
+
+  ReceiverUI ->> Supabase: SELECT gift by giftId
+  Note right of Supabase: RLS check: email must match receiver_email
+
+  alt Gift is funded
+    ReceiverUI -->> Supabase: SUBSCRIBE to gift updates (realtime)
+    ReceiverUI ->> Supabase: UPDATE gift status = "claimed"
+    ReceiverUI ->> Wallet: Withdraw tokens to own wallet
+  else Gift not funded yet
+    ReceiverUI -->> ReceiverUI: Show loading / waiting state
   end
-  SolanaChain-->>PayPage: tx signature
-  PayPage->>Supabase: update gifts.status = 'paid'
-  Supabase-->>PayPage (realtime): row update
-  PayPage->>Sender: redirect /success
+
 ```
 
 Realtime DB push removes need for webhooks locally; in production you can mirror the same logic in a Supabase Edge Function trigger.
